@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECRET KEY MANAGEMENT
-secret_file = os.path.join('config/', 'secrets.json')
+secret_file = os.path.join(BASE_DIR, 'config/secrets.json')
 
 with open(secret_file) as f:
     secrets = json.loads(f.read())
@@ -37,7 +37,7 @@ SECRET_KEY = get_secret("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['nrurnru.pythonanywhere.com']
+ALLOWED_HOSTS = ['nrurnru.pythonanywhere.com','localhost']
 
 
 # Application definition
