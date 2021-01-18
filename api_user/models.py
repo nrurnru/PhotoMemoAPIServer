@@ -17,8 +17,8 @@ class Memo(models.Model):
     memo_id = models.ForeignKey(User, on_delete=models.CASCADE)
     memo_number = models.CharField(max_length=128, null = False)
     text = models.TextField()
-    createdAt = models.DateField(default=timezone.now)
-    updatedAt = models.DateField(default=timezone.now)
+    createdAt = models.DateTimeField(default=timezone.now)
+    updatedAt = models.DateTimeField(default=timezone.now)
     isDeleted = models.BooleanField(default=False)
     isSynced = models.BooleanField(default=False)
 
