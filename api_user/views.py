@@ -45,7 +45,7 @@ class MemoView(APIView):
             memo_serializer = MemoSerializer(memo_object)
             return Response(memo_serializer.data, status = status.HTTP_200_OK)
 
-    def post(self, request: str):
+    def post(self, request):
         memo_serializer = MemoSerializer(data = request.data)
         
         if memo_serializer.is_valid():
@@ -61,13 +61,16 @@ class MemoView(APIView):
         return Response("Not implemented", status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class SyncView(APIView):
-    def get(self, request):
-        # createdAt 동적으로 받아야함
-        created_memo_object = Memo.objects.filter(createdAt__lt="2021-01-19T19:11:19.610542Z") 
+    def get(self, request, **kwargs):
+
+        if kwargs.get('last_synced') is None:
+            return Response("error: 'data' parameter needed", status = status.HTTP_400_BAD_REQUEST)
+        last_synced = kwargs.get('last_synced')
+
+        created_memo_object = Memo.objects.filter(created_at__gt=last_synced) 
         created_memo_serializer = MemoSerializer(created_memo_object, many=True)
 
-        # updatedAt 동적으로 받아야함
-        updated_memo_object = Memo.objects.filter(updatedAt__lt="2021-01-19T19:11:19.610542Z") 
+        updated_memo_object = Memo.objects.filter(updated_at__gt=last_synced) 
         updated_memo_serializer = MemoSerializer(updated_memo_object, many=True)
 
         sync_data = {}
@@ -80,6 +83,8 @@ class SyncView(APIView):
         return Response(sync_data, status = status.HTTP_200_OK)
 
     def post(self, request):
+        last_synced = request.data['last_synced']
+
         created_memo_serializer = MemoSerializer(data=request.data['created_memos'], many=True)
         if created_memo_serializer.is_valid():
             created_memo_serializer.save()
@@ -87,7 +92,7 @@ class SyncView(APIView):
             return Response("error", status=status.HTTP_400_BAD_REQUEST)
 
         # 업데이트 범위지정 필요
-        memo_object = Memo.objects.all()
+        memo_object = Memo.objects.filter(updatedAt__gt=last_synced)
         updated_memo_serializer = MemoSerializer(memo_object, data=request.data['updated_memos'], many=True)
         if updated_memo_serializer.is_valid():
             updated_memo_serializer.save()
