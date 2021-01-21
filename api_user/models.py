@@ -14,8 +14,8 @@ class User(models.Model):
 class Memo(models.Model):
     objects = models.Manager() #경고없애기용, 무시가능
     
+    id = models.CharField(max_length=256, null = False, primary_key=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    memo_number = models.CharField(max_length=128, null = False)
     text = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)

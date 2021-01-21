@@ -22,8 +22,8 @@ class MemoListSerializer(serializers.ListSerializer):
                 ret.append(self.child.update(memo, data))
         return ret
 
-class MemoSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
+class MemoSerializer(serializers.ModelSerializer):    
+    id = serializers.CharField()
 
     class Meta:
         list_serializer_class = MemoListSerializer

@@ -62,19 +62,14 @@ class MemoView(APIView):
 
 class SyncView(APIView):
     def get(self, request, **kwargs):
-
         if kwargs.get('last_synced') is None:
             return Response("error: 'data' parameter needed", status = status.HTTP_400_BAD_REQUEST)
         last_synced = kwargs.get('last_synced')
-
-        created_memo_object = Memo.objects.filter(created_at__gt=last_synced) 
-        created_memo_serializer = MemoSerializer(created_memo_object, many=True)
 
         updated_memo_object = Memo.objects.filter(updated_at__gt=last_synced) 
         updated_memo_serializer = MemoSerializer(updated_memo_object, many=True)
 
         sync_data = {}
-        sync_data['created_memos'] = created_memo_serializer.data
         sync_data['updated_memos'] = updated_memo_serializer.data
 
         # 삭제한 메모 아이디 구현 필요
@@ -84,20 +79,12 @@ class SyncView(APIView):
 
     def post(self, request):
         last_synced = request.data['last_synced']
-
-        created_memo_serializer = MemoSerializer(data=request.data['created_memos'], many=True)
-        if created_memo_serializer.is_valid():
-            created_memo_serializer.save()
-        else:
-            return Response("error", status=status.HTTP_400_BAD_REQUEST)
-
-        # 업데이트 범위지정 필요
         memo_object = Memo.objects.filter(updated_at__gt=last_synced)
         updated_memo_serializer = MemoSerializer(memo_object, data=request.data['updated_memos'], many=True)
         if updated_memo_serializer.is_valid():
             updated_memo_serializer.save()
         else:
-            return Response("error", status=status.HTTP_400_BAD_REQUEST)
+            return Response(updated_memo_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         #delete 동기화 동작
         pass
