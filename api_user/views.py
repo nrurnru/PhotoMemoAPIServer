@@ -92,7 +92,7 @@ class SyncView(APIView):
             return Response("error", status=status.HTTP_400_BAD_REQUEST)
 
         # 업데이트 범위지정 필요
-        memo_object = Memo.objects.filter(updatedAt__gt=last_synced)
+        memo_object = Memo.objects.filter(updated_at__gt=last_synced)
         updated_memo_serializer = MemoSerializer(memo_object, data=request.data['updated_memos'], many=True)
         if updated_memo_serializer.is_valid():
             updated_memo_serializer.save()
