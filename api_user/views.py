@@ -61,10 +61,11 @@ class MemoView(APIView):
         return Response("Not implemented", status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class SyncView(APIView):
-    def get(self, request, **kwargs):
-        if kwargs.get('last_synced') is None:
+    def get(self, request):
+
+        last_synced = request.GET.get("last_synced", None)
+        if last_synced is None:
             return Response("error: 'data' parameter needed", status = status.HTTP_400_BAD_REQUEST)
-        last_synced = kwargs.get('last_synced')
 
         updated_memo_object = Memo.objects.filter(updated_at__gt=last_synced) 
         updated_memo_serializer = MemoSerializer(updated_memo_object, many=True)
@@ -78,6 +79,7 @@ class SyncView(APIView):
         return Response(sync_data, status = status.HTTP_200_OK)
 
     def post(self, request):
+
         last_synced = request.data['last_synced']
         memo_object = Memo.objects.filter(updated_at__gt=last_synced)
         updated_memo_serializer = MemoSerializer(memo_object, data=request.data['updated_memos'], many=True)
