@@ -4,7 +4,7 @@ from django.utils import timezone
 class User(models.Model):
     objects = models.Manager() #경고없애기용, 무시가능
 
-    user_id = models.IntegerField()
+    user_id = models.CharField(max_length=256, null=False, primary_key=True)
     password = models.CharField(max_length=128, null=False)
     address = models.CharField(max_length=256, null=True)
  
@@ -22,3 +22,9 @@ class Memo(models.Model):
 
     class Meta:
         db_table = "Memo"
+
+class DeletedMemoID(models.Model):
+    objects = models.Manager()
+
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    deleted_id = models.CharField(max_length=256, primary_key=True)

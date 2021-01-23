@@ -9,5 +9,6 @@ urlpatterns = [
     path('memo/<int:memo_id>', views.MemoView.as_view()), # http://localhost:8000/memo/{id}
     path('memo/', views.MemoView.as_view()), # http://localhost:8000/users/memo/
 
-    path('sync', views.SyncView.as_view()) # http://localhost:8000/users/sync
+    path('sync', views.SyncView.as_view()), # http://localhost:8000/users/sync
+
 ]

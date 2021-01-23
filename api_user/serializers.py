@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Memo
+from .models import User, Memo, DeletedMemoID
  
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,10 +14,10 @@ class MemoListSerializer(serializers.ListSerializer):
 
         # Perform creations and updates.
         ret = []
-        for memo_id, data in data_mapping.items():
-            memo = memo_mapping.get(memo_id, None)
+        for memo_id, data in data_mapping.items(): 
+            memo = memo_mapping.get(memo_id)
             if memo is None:
-                ret.append(self.child.create(data))
+                ret.append(self.child.create(data)) 
             else:
                 ret.append(self.child.update(memo, data))
         return ret
@@ -28,4 +28,14 @@ class MemoSerializer(serializers.ModelSerializer):
     class Meta:
         list_serializer_class = MemoListSerializer
         model = Memo
+        #ID가 없이도 밸리데이션 통과하도록 설정
+        fields = ('id', 'text', 'created_at', 'updated_at')
+
+class DeletedMemoIDListSerializer(serializers.ListField):
+    #user_id = serializers.CharField(max_length=256)
+    deleted_ids = serializers.CharField(max_length=256)
+
+class DeletedMemoIDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeletedMemoID
         fields = '__all__'
