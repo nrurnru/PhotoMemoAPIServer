@@ -1,12 +1,26 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .serializers import UserSerializer, MemoSerializer, DeletedMemoIDListSerializer, DeletedMemoIDSerializer
-from rest_framework import status
-from .models import User, Memo, DeletedMemoID
-from rest_framework import request
+import jwt, json, os
+from pathlib import Path
 from django.utils import timezone
 from django.db.models import Q
- 
+from django.core.exceptions import ImproperlyConfigured
+from rest_framework import status
+from rest_framework import request
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import User, Memo, DeletedMemoID
+from .serializers import UserSerializer, MemoSerializer, DeletedMemoIDListSerializer, DeletedMemoIDSerializer
+
+def get_secret(setting):
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    secret_file = os.path.join(BASE_DIR, 'config/secrets.json')
+    with open(secret_file) as f:
+        secrets = json.loads(f.read())
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = "Set the {} environment variable".format(setting)
+        raise ImproperlyConfigured(error_msg)
+
 class UserView(APIView):
     def get(self, request, **kwargs):
         if kwargs.get('user_id') is None:
@@ -98,7 +112,7 @@ class SyncView(APIView):
             return Response("error: User id required", status = status.HTTP_401_UNAUTHORIZED)
         
         user_object = User.objects.get(user_id = user_id)
-        if user_id == None:
+        if not user_id.exist():
             return Response("error: Given wrong id", status = status.HTTP_401_UNAUTHORIZED)
 
         # 메모 업데이트
@@ -122,3 +136,30 @@ class SyncView(APIView):
             target.delete()
 
         return Response("Upload sync completed successfully", status=status.HTTP_200_OK)
+
+class LoginView(APIView):
+    def get(self, request):
+        user_id = request.META.get('HTTP_USERID')
+        password = request.META.get('HTTP_USERPASSWORD')
+
+        if user_id is None or password is None:
+            return Response("error: lgin information required.", status = status.HTTP_401_UNAUTHORIZED)
+
+        user_query = User.objects.filter(user_id=user_id, password=password)
+        if user_query.exists():
+            data = {'user_id': user_id, 'password': password}
+            token_data = {'token': jwt.encode(data, get_secret('SECRET_KEY'), get_secret('JWT_ALGORITHM'))}
+            return Response(token_data, status = status.HTTP_200_OK)
+        else:
+            return Response("error: user does not match.", status = status.HTTP_401_UNAUTHORIZED)
+
+    def post(self, request):
+        user_id = request.META.get('HTTP_USERID')
+        user_password = request.META.get('HTTP_USERPASSWORD')
+        data = {'user_id': user_id, 'password': user_password}
+        user_serializer = UserSerializer(data = data)
+        if user_serializer.is_valid():
+            user_serializer.save()
+            return Response("success", status=status.HTTP_201_CREATED)
+        else:
+            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -10,5 +10,5 @@ urlpatterns = [
     path('memo/', views.MemoView.as_view()), # http://localhost:8000/users/memo/
 
     path('sync', views.SyncView.as_view()), # http://localhost:8000/users/sync
-
+    path('login', views.LoginView.as_view()), # http://localhost:8000/users/login
 ]
