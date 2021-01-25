@@ -41,21 +41,11 @@ class UserView(APIView):
             return Response(user_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def put(self, request):
-        return Response("Not implemented", status=status.HTTP_501_NOT_IMPLEMENTED) 
-    
-    def delete(self, request):
-        return Response("Not implemented", status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class MemoView(APIView):
     def get(self, request, **kwargs):
         if kwargs.get('memo_id') is None:
-
-            user_id = request.META.get('HTTP_AUTHORIZATION')
-            query_user_id = Q(user_id = user_id)
-
-            memo_queryset = Memo.objects.filter(query_user_id)
+            memo_queryset = Memo.objects.all()
             memo_queryset_serializer = MemoSerializer(memo_queryset, many = True)
             return Response(memo_queryset_serializer.data, status = status.HTTP_200_OK)
         else:
@@ -72,16 +62,15 @@ class MemoView(APIView):
             return Response(memo_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(memo_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def put(self, request):
-        return Response("Not implemented", status=status.HTTP_501_NOT_IMPLEMENTED) 
-    
-    def delete(self, request):
-        return Response("Not implemented", status=status.HTTP_501_NOT_IMPLEMENTED)
 
 class SyncView(APIView):
     def get(self, request):
-        user_id = request.META.get('HTTP_AUTHORIZATION')
+        jwt_data = request.META.get('HTTP_JWT')
+        jwt_token = jwt.decode(jwt_data, get_secret('SECRET_KEY'), get_secret('JWT_ALGORITHM'))
+        user_id = jwt_token['user_id']
+        if user_id is None:
+            return Response("error: invalid token", status = status.HTTP_401_UNAUTHORIZED)
+
         last_synced = request.GET.get("last_synced", None)
         if last_synced is None:
             return Response("error: 'data' parameter needed", status = status.HTTP_400_BAD_REQUEST)
@@ -106,14 +95,16 @@ class SyncView(APIView):
         return Response(sync_data, status = status.HTTP_200_OK)
 
     def post(self, request):
-        # 헤더로부터 유저 아이디 전달
-        user_id = request.META.get('HTTP_AUTHORIZATION')
-        if user_id == None:
-            return Response("error: User id required", status = status.HTTP_401_UNAUTHORIZED)
-        
+        # 헤더로부터 jwt 토큰 받아오기
+        jwt_data = request.META.get('HTTP_JWT')
+        jwt_token = jwt.decode(jwt_data, get_secret('SECRET_KEY'), get_secret('JWT_ALGORITHM'))
+        user_id = jwt_token['user_id']
+        if user_id is None:
+            return Response("error: invalid token", status = status.HTTP_401_UNAUTHORIZED)
+
         user_object = User.objects.get(user_id = user_id)
-        if not user_id.exist():
-            return Response("error: Given wrong id", status = status.HTTP_401_UNAUTHORIZED)
+        if user_object is None:
+            return Response("error: no user match with token", status = status.HTTP_401_UNAUTHORIZED)
 
         # 메모 업데이트
         updated_memo_query = Memo.objects.filter(user_id = user_id)
