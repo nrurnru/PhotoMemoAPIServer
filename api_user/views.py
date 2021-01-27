@@ -123,8 +123,12 @@ class SyncView(APIView):
 
         # 메모 테이블에서 지워진 메모를 삭제
         for deleted_memo_id in request.data['deleted_memo_ids']:
-            target = Memo.objects.get(id=deleted_memo_id)
-            target.delete()
+            try:
+                target = Memo.objects.get(id=deleted_memo_id)
+                target.delete()
+            except:
+                pass
+            
 
         return Response("Upload sync completed successfully", status=status.HTTP_200_OK)
 
