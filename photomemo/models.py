@@ -18,6 +18,7 @@ class Memo(models.Model):
     text = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
+    image_url = models.CharField(max_length=256, null=False)
 
     class Meta:
         db_table = "Memo"

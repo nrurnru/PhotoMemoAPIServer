@@ -29,7 +29,7 @@ class MemoSerializer(serializers.ModelSerializer):
         list_serializer_class = MemoListSerializer
         model = Memo
         #ID가 없이도 밸리데이션 통과하도록 설정
-        fields = ('id', 'text', 'created_at', 'updated_at')
+        fields = ('id', 'text', 'created_at', 'updated_at', 'image_url')
 
 class DeletedMemoIDListSerializer(serializers.ListField):
     #user_id = serializers.CharField(max_length=256)
