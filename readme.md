@@ -12,6 +12,7 @@
 |POST|http://nrurnru.pythonanywhere.com/memo/login|입력된 정보로 회원가입을 시도합니다.|
 
 ### Header
+
 |KEY|VALUE|
 |---|---|
 |Userid|(가입할 아이디)|
@@ -37,8 +38,9 @@
 |GET|http://nrurnru.pythonanywhere.com/memo/login|입력된 정보로 서버에 로그인합니다.|
 
 ### Header
+
 |KEY|VALUE|
-|---|---|---|
+|---|---|
 |Userid|(가입할 아이디)|
 |Userpassword|(가입할 패스워드)|
 
@@ -64,8 +66,9 @@
 |POST|http://nrurnru.pythonanywhere.com/memo/sync|메모 데이터를 json형식으로 전송해 서버로 업로드합니다.|
 
 ### Header
+
 |KEY|VALUE|
-|---|---|---|
+|---|---|
 |jwt|(발급받은 토큰)|
 
 
@@ -96,13 +99,15 @@
 |GET|http://nrurnru.pythonanywhere.com/memo/sync|메모 데이터를 json형식으로 전송해 서버로 다운로드합니다.|
 
 ### Header
+
 |KEY|VALUE|
-|---|---|---|
+|---|---|
 |jwt|(발급받은 토큰)|
 
 ### Query string
+
 |KEY|VALUE|
-|---|---|---|
+|---|---|
 |last_synced|(마지막 동기화 날짜)|
 
 ### Request
